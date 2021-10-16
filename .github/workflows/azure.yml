@@ -1,0 +1,44 @@
+name: Teste
+
+# Gatilhos
+# Programados - Axecução automatico
+# Acionados por eventos - Ex: Quando tiver um push
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+  # Maquina que iremos usar
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    environment: production
+    
+  # Passos - preparando a maquina.
+    steps:
+  # Download do código
+    - uses: actions/checkout@v2
+    
+  #Seput Versão do Node
+    - name: Use Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: 14.x
+    - name: npm install, cy:run, and test
+      run: |
+        npm install
+        npm run cy:run
+        continue-on-error: true
+        npm run report:merge
+        npm run report:mocha
+        
+# GitHub Pages - publicar o relatório
+    - name: Deploy to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@4.1.5
+      with:
+        GITHUB_TOKEN: $({ secrets.GITHUB_TOKEN })
+        BRANCH: gh-pages
+        FOLDER: mochawesome-report
+  
